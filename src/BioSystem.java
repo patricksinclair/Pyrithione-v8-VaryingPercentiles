@@ -144,9 +144,8 @@ class BioSystem {
                     ///////////// DETACHMENTS /////////////////////////
                     if(mh_index == immigration_index){
                         detachment_allocations[bac_index] = new PoissonDistribution(deterioration_rate*tau_step).sample();
-                        //no_of_detachments += detachment_allocations[bac_index];
+
                         if(detachment_allocations[bac_index] > 1){
-                            //no_of_detachments -= detachment_allocations[bac_index];
                             tau_step /= 2.;
                             continue whileloop;
                         }
@@ -265,10 +264,10 @@ class BioSystem {
     static void getBiofilmThicknessHistoInParallel(int nReps, double scale, double sigma){
         long startTime = System.currentTimeMillis();
 
-        int nSections = 8; //number of sections the reps will be divided into, to avoid using loadsa resources
+        int nSections = 9; //number of sections the reps will be divided into, to avoid using loadsa resources
         int nRuns = nReps/nSections; //number of runs in each section
 
-        double duration = 1680.; //10 week duration
+        double duration = 25.*7.*24.; //25 week duration
 
         int[][] index_and_counters_reached = new int[nReps][];
 
