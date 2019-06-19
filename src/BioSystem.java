@@ -11,12 +11,16 @@ class BioSystem {
     private double alpha, c_max; //steepness and max val of antimicrobial concn
     private double scale, sigma; //mic distb shape parameters
     private ArrayList<Microhabitat> microhabitats;
-    private double time_elapsed;
+    private double time_elapsed, exit_time; //exit time is the time it took for the biofilm to reach the thickness limit, if it did
     private int immigration_index;
 
     private double deterioration_rate = 0.0516;
+    private double immigration_rate = 0.8;
+    private double tau = 0.01;
     private double delta_x = 5.;
+    private int thickness_limit = 50; //this is how big the system can get before we exit. should reduce overall simulation duration
     private int n_detachments = 0, n_deaths = 0, n_replications = 0, n_immigrations = 0;
+
 
     private BioSystem(double alpha, double c_max, double scale, double sigma){
 
@@ -26,6 +30,7 @@ class BioSystem {
         this.sigma = sigma;
         this.microhabitats = new ArrayList<>();
         this.time_elapsed = 0.;
+        this.exit_time = 0.;
         this.immigration_index = 0;
 
         microhabitats.add(new Microhabitat(calc_C_i(0, this.c_max, this.alpha, delta_x), scale, sigma));
@@ -39,7 +44,10 @@ class BioSystem {
     private int getN_immigrations(){return n_immigrations;}
 
     private double getTimeElapsed(){return time_elapsed;}
+    private double getExit_time(){return exit_time;}
     private int getBiofilmThickness(){return microhabitats.size();}
+
+    private void setExit_time(double exit_time){this.exit_time = exit_time;}
 
     private int getTotalN(){
         int runningTotal = 0;
@@ -101,12 +109,19 @@ class BioSystem {
             immigration_index = i;
             microhabitats.get(immigration_index).setImmigration_zone(true);
         }
+
+        //this stops sims going onn unnecessarily too long. if the biofilm reaches the thickness limit then we record the
+        //time this happened at and move on
+        if(getBiofilmThickness()==thickness_limit){
+            exit_time = time_elapsed;
+            time_elapsed = 9e9; //this way the time elapsed is now way above the duration value, so the simulation will stop
+        }
     }
 
 
     private void performAction(){
 
-        double tau_step = 0.01; //tau used for tau leaping time increment
+        double tau_step = tau; //tau used for tau leaping time increment
 
         int system_size = microhabitats.size(); //this is all the microhabs in the system
         int[][] replication_allocations;
@@ -192,7 +207,7 @@ class BioSystem {
                 original_popsizes[mh_index] = microhabitats.get(mh_index).getN();
             }
 
-            double immigration_rate = 0.8;
+
             n_immigrants = new PoissonDistribution(immigration_rate*tau_step).sample();
             break;
         }
@@ -256,8 +271,9 @@ class BioSystem {
 
             bs.performAction();
         }
+        if((int)bs.exit_time == 0) bs.exit_time = duration;
 
-        return new int[]{bs.getBiofilmEdge(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_immigrations(), bs.getN_replications()};
+        return new int[]{bs.getBiofilmEdge(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_immigrations(), bs.getN_replications(), (int)bs.getExit_time()};
     }
 
 
@@ -272,7 +288,7 @@ class BioSystem {
         int[][] index_and_counters_reached = new int[nReps][];
 
         String index_reached_filename = "pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
-        String[] headers = new String[]{"bf edge", "n_deaths", "n_detachments", "n_immigrations", "n_replications"};
+        String[] headers = new String[]{"bf edge", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
 
         for(int j = 0; j < nSections; j++){
             System.out.println("section: "+j);
