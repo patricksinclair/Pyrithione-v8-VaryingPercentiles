@@ -338,7 +338,7 @@ class BioSystem {
         String event_counters_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
         String mh_pops_over_time_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-sigma="+String.format("%.5f", sigma)+"-mh_pops-runID=";
 
-        DataBox[] dataBoxes = new DataBox[nRuns];
+        DataBox[] dataBoxes = new DataBox[nReps];
 
         for(int j = 0; j < nSections; j++){
             System.out.println("section: "+j);
