@@ -8,17 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class Toolbox {
 
 
-    public static double[][] convert2DIntArrayToDoubleArray(int[][] source){
-        double[][] result = new double[source.length][];
-        for(int i = 0; i < source.length; i++){
-            double[] sub_result = new double[source[i].length];
-            for(int j = 0; j < source[i].length; j++){
-                sub_result[j] = (double)source[i][j];
-            }
-            result[i] = sub_result;
-        }
-        return result;
-    }
+
 
     private static int largestHeaderLength(String[] headers){
         int biggun = 0;
@@ -60,66 +50,7 @@ public class Toolbox {
     }
 
 
-    private static double stDevOfArrayList(ArrayList<Double> listo){
 
-        if(listo.size() > 0) {
-            double mean = Toolbox.averageOfArrayList(listo);
-            double sumSq = 0.;
-
-            for(Double d : listo) {
-                sumSq += (d-mean)*(d-mean);
-            }
-            return Math.sqrt(sumSq/(listo.size()-1));
-        }else{
-            return 0.;
-        }
-    }
-
-    private static double[] averagedResults(double[][] inputData){
-
-        int nReps = inputData.length;
-        int nMeasurements = inputData[0].length;
-
-        double[] averagedResults = new double[nMeasurements];
-
-        //iterate over the counters, checking all the reps, then moving to next counter
-        for(int c = 0; c < nMeasurements; c++){
-            double runningTotal = 0.;
-            for(int r = 0; r < nReps; r++){
-                runningTotal += inputData[r][c];
-            }
-            averagedResults[c] = runningTotal/nReps;
-        }
-        return averagedResults;
-    }
-
-    //modified this to handle zeroes
-    public static double[][] averagedResults(double[][][] inputData){
-
-        int nReps = inputData.length;
-        int nTimes = inputData[0].length;
-        int L = inputData[0][0].length;
-
-        double[][] averagedResults = new double[nTimes][L];
-
-        for(int t = 0; t < nTimes; t++){
-
-            for(int l = 0; l < L; l++){
-
-                double runningTotal = 0.;
-                int repCounter = 0;
-                for(int r = 0; r < nReps; r++){
-                    if(inputData[r][t][l]!=0){
-                        runningTotal += inputData[r][t][l];
-                        repCounter++;
-                    }
-
-                }
-                averagedResults[t][l] = (repCounter > 0) ? runningTotal/repCounter : 0.;
-            }
-        }
-        return averagedResults;
-    }
 
 
 
@@ -147,54 +78,9 @@ public class Toolbox {
     }
 
 
-    public static void writeAveragedDistbsToFile(String filename, double[][] inputData){
-
-        try {
-            File file = new File(filename+".txt");
-            if(!file.exists()) file.createNewFile();
-
-            FileWriter fw = new FileWriter(file.getAbsoluteFile());
-            BufferedWriter bw = new BufferedWriter(fw);
-
-            int nTimes = inputData.length;
-            int L = inputData[0].length;
-
-            for(int l = 0; l < L; l++){
-                String output = String.valueOf(l)+" ";
-                for(int t = 0; t < nTimes; t++){
-                    output += String.format("%.6f ", inputData[t][l]);
-                }
-                bw.write(output);
-                bw.newLine();
-            }
-            bw.close();
-        }catch (IOException e){}
-    }
 
 
 
-
-    public static void writeAveragedArrayToFile(String filename, double[] data){
-
-        try{
-            File file = new File(filename+".txt");
-            if(!file.exists()) file.createNewFile();
-
-            FileWriter fw = new FileWriter(file.getAbsoluteFile());
-            BufferedWriter bw = new BufferedWriter(fw);
-
-            String headerString = "#";
-            String dataString = "";
-
-            for(int i = 0; i < data.length; i++){
-                bw.write(String.valueOf(data[i]));
-                bw.newLine();
-            }
-            bw.close();
-
-        }catch (IOException e){}
-
-    }
 
 
 
@@ -244,7 +130,8 @@ public class Toolbox {
 
 
 
-    public static void writeCountersToFile(String filename, String[] headers, int[][] counters){
+
+    static void writeCountersToFile(String filename, String[] headers, int[][] counters){
         try{
             File file = new File(filename+".txt");
             if(!file.exists()) file.createNewFile();
@@ -285,6 +172,99 @@ public class Toolbox {
         }catch (IOException e){}
 
     }
+
+
+    static void writeDataboxEventCountersToFile(String filename, String[] headers, DataBox[] dataBoxes){
+
+        try{
+            File file = new File(filename+".txt");
+            if(!file.exists()) file.createNewFile();
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            int ncols = headers.length;
+            int string_length = Math.max(12, Toolbox.largestHeaderLength(headers)+3);
+            String head_start = "#"+headers[0]+",";
+            String file_header = String.format("%-"+string_length+"s", head_start);
+            for(int i = 1; i < headers.length-1; i++){
+                String heado = headers[i]+",";
+                file_header += String.format("%-"+string_length+"s", heado);
+            }
+            String heado = headers[headers.length-1];
+            file_header += String.format("%-"+string_length+"s", heado);
+            bw.write(file_header);
+            bw.newLine();
+
+
+            for(int i = 0; i < dataBoxes.length; i++){
+
+                //runID is also included in the event_counters array, so it's printed to file here too
+                int[] event_counters = dataBoxes[i].getEvent_counters();
+                String output = "";
+
+                for(int nc = 0; nc < ncols-1; nc++){
+                    String num_val = String.format("%d", event_counters[nc])+",";
+                    output += String.format("%-"+string_length+"s", num_val);
+                }
+                String num_val = String.format("%d", event_counters[ncols-1]);
+                output += String.format("%-"+string_length+"s", num_val);
+
+                bw.write(output);
+                bw.newLine();
+            }
+            bw.close();
+
+        }catch (IOException e){}
+
+    }
+
+
+    static void writeDataboxMicrohabPopsToFile(String filename, DataBox dataBox){
+
+        try{
+            File file = new File(filename+".txt");
+            if(!file.exists()) file.createNewFile();
+
+            FileWriter fw = new FileWriter(file.getAbsoluteFile());
+            BufferedWriter bw = new BufferedWriter(fw);
+
+            ArrayList<Double> times = dataBox.getTimes();
+            ArrayList<ArrayList<ArrayList<Double>>> mh_pops_over_time = dataBox.getAll_microhab_pops();
+
+            int string_length = 12;
+
+            for(int t = 0; t < times.size(); t++){
+                bw.write("#t = "+String.valueOf(times.get(t)));
+                bw.newLine();
+
+                for(int mh = 0; mh < mh_pops_over_time.get(t).size(); mh++){
+
+                    String output = "";
+                    int nbac = mh_pops_over_time.get(t).get(mh).size();
+                    for(int b = 0; b < nbac-1; b++){
+
+                        String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(b))+",";
+                        output += String.format("%-"+string_length+"s", geno_val);
+                    }
+                    String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(nbac-1));
+                    output += String.format("%-"+string_length+"s", geno_val);
+
+                    bw.write(output);
+                    bw.newLine();
+                }
+            }
+
+            bw.close();
+
+        }catch (IOException e){}
+    }
+
+
+
+
+
+
 
 
 

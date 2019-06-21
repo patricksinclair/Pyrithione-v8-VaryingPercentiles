@@ -45,7 +45,7 @@ class BioSystem {
 
     private double getTimeElapsed(){return time_elapsed;}
     private double getExit_time(){return exit_time;}
-    private int getBiofilmThickness(){return microhabitats.size();}
+    private int getSystemSize(){return microhabitats.size();}
 
     private void setExit_time(double exit_time){this.exit_time = exit_time;}
 
@@ -64,6 +64,23 @@ class BioSystem {
         }
         return edgeIndex;
     }
+
+    private int getBiofilmThickness(){
+        int thickness = 0;
+        for(int i = 0; i < microhabitats.size(); i++){
+            if(microhabitats.get(i).isBiofilm_region()) thickness = i+1;
+        }
+        return thickness;
+    }
+
+    private ArrayList<ArrayList<Double>> getMicrohabPopulations(){
+        ArrayList<ArrayList<Double>> mh_pops = new ArrayList<>(getSystemSize());
+        for(Microhabitat m : microhabitats){
+            mh_pops.add(m.getPopulation());
+        }
+        return mh_pops;
+    }
+
 
 
 
@@ -112,7 +129,7 @@ class BioSystem {
 
         //this stops sims going onn unnecessarily too long. if the biofilm reaches the thickness limit then we record the
         //time this happened at and move on
-        if(getBiofilmThickness()==thickness_limit){
+        if(getSystemSize()==thickness_limit){
             exit_time = time_elapsed;
             time_elapsed = 9e9; //this way the time elapsed is now way above the duration value, so the simulation will stop
         }
@@ -262,7 +279,7 @@ class BioSystem {
 
             if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
 
-                int max_poss_pop = bs.getBiofilmThickness()*K;
+                int max_poss_pop = bs.getSystemSize()*K;
                 System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
                 alreadyRecorded = true;
             }
@@ -273,7 +290,7 @@ class BioSystem {
         }
         if((int)bs.exit_time == 0) bs.exit_time = duration;
 
-        return new int[]{bs.getBiofilmEdge(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_immigrations(), bs.getN_replications(), (int)bs.getExit_time()};
+        return new int[]{bs.getBiofilmThickness(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_immigrations(), bs.getN_replications(), (int)bs.getExit_time()};
     }
 
 
@@ -288,7 +305,7 @@ class BioSystem {
         int[][] index_and_counters_reached = new int[nReps][];
 
         String index_reached_filename = "pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
-        String[] headers = new String[]{"bf edge", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
+        String[] headers = new String[]{"bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
 
         for(int j = 0; j < nSections; j++){
             System.out.println("section: "+j);
@@ -304,6 +321,86 @@ class BioSystem {
         System.out.println("results written to file");
         System.out.println("Time taken: "+diff);
     }
+
+
+
+    static void getEventCountersAndRunPopulations(int nReps, double scale, double sigma){
+        long startTime = System.currentTimeMillis();
+
+        int nSections = 9; //number of sections the reps will be divided into, to avoid using loadsa resources
+        int nRuns = nReps/nSections; //number of runs in each section
+        int nMeasurements = 100; //no. of measurements
+
+        double duration = 25.*7.*24.; //25 week duration
+
+        String results_directory = "all_run_populations/";
+        String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
+        String event_counters_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
+        String mh_pops_over_time_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-sigma="+String.format("%.5f", sigma)+"-mh_pops-runID=";
+
+        DataBox[] dataBoxes = new DataBox[nRuns];
+
+        for(int j = 0; j < nSections; j++){
+            System.out.println("section: "+j);
+
+            IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i ->
+                    dataBoxes[i] = getEventCountersAndRunPops_Subroutine(duration, nMeasurements, i, scale, sigma));
+        }
+
+
+        Toolbox.writeDataboxEventCountersToFile(event_counters_filename, headers, dataBoxes);
+
+        for(int i = 0; i < dataBoxes.length; i++){
+            String run_filename = mh_pops_over_time_filename+String.valueOf(dataBoxes[i].getRunID());
+            Toolbox.writeDataboxMicrohabPopsToFile(run_filename, dataBoxes[i]);
+        }
+
+
+        long finishTime = System.currentTimeMillis();
+        String diff = Toolbox.millisToShortDHMS(finishTime - startTime);
+        System.out.println("results written to file");
+        System.out.println("Time taken: "+diff);
+
+    }
+
+
+
+    private static DataBox getEventCountersAndRunPops_Subroutine(double duration, int nMeasurements, int runID, double scale, double sigma){
+
+        int K = 120;
+        double c_max = 10., alpha = 0.01;
+        double interval = duration/nMeasurements;
+        boolean alreadyRecorded = false;
+
+        BioSystem bs = new BioSystem(alpha, c_max, scale, sigma);
+        ArrayList<ArrayList<ArrayList<Double>>> mh_pops_over_time = new ArrayList<>(nMeasurements+1);
+        ArrayList<Double> times = new ArrayList<>(nMeasurements+1);
+
+
+        while(bs.time_elapsed <= duration+0.02*interval){
+
+            if((bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
+
+                int max_poss_pop = bs.getSystemSize()*K;
+                System.out.println("rep : "+runID+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
+                alreadyRecorded = true;
+
+                times.add(bs.getTimeElapsed());
+                mh_pops_over_time.add(bs.getMicrohabPopulations());
+            }
+            if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
+
+
+            bs.performAction();
+        }
+        if((int)bs.exit_time == 0) bs.exit_time = duration;
+
+        int[] event_counters = new int[]{runID, bs.getBiofilmThickness(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_immigrations(), bs.getN_replications(), (int)bs.getExit_time()};
+
+        return new DataBox(runID, event_counters, times, mh_pops_over_time);
+    }
+
+
 
 
     private static double calc_C_i(int i, double c_max, double alpha, double delta_x){
