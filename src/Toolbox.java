@@ -247,8 +247,12 @@ public class Toolbox {
                         String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(b))+",";
                         output += String.format("%-"+string_length+"s", geno_val);
                     }
-                    String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(nbac-1));
-                    output += String.format("%-"+string_length+"s", geno_val);
+                    //need to handle if the array is of length 0
+                    if(nbac > 0){
+                        String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(nbac-1));
+                        output += String.format("%-"+string_length+"s", geno_val);
+                    }
+
 
                     bw.write(output);
                     bw.newLine();

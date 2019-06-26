@@ -5,7 +5,7 @@ public class PyrithioneMain {
         double scale_95 = 1.9246899, sigma_95 = 1.00179994;
         double scale_90 = 1.01115312, sigma_90 = 1.51378016;
         int nReps = 180;
-        System.out.println("geno distbs now with thickness limit and new javac script");
+        System.out.println("geno distbs now with thickness limit and file handling");
         //BioSystem.getBiofilmThicknessHistoInParallel(nReps, scale_99, sigma_99);
         BioSystem.getEventCountersAndRunPopulations(nReps, scale_99, sigma_99);
     }

@@ -1,3 +1,3 @@
 #!/bin/bash
 javac -cp ".:java_jars/*" *.java
-nohup java -cp ".:java_jars/*" PyrithioneMain &> nohup_thicklimit.out&
+nohup java -cp ".:java_jars/*" PyrithioneMain &> geno_distbs_log.out&
