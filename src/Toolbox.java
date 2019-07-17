@@ -235,7 +235,7 @@ public class Toolbox {
             int string_length = 12;
 
             for(int t = 0; t < times.size(); t++){
-                bw.write("#t = "+String.valueOf(times.get(t)));
+                bw.write("#t = "+String.format("%.3E", String.valueOf(times.get(t))));
                 bw.newLine();
 
                 for(int mh = 0; mh < mh_pops_over_time.get(t).size(); mh++){
@@ -247,7 +247,7 @@ public class Toolbox {
                         String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(b))+",";
                         output += String.format("%-"+string_length+"s", geno_val);
                     }
-                    //need to handle if the array is of length 0
+                    //need to handle if the array is of length 0 - think this does that
                     if(nbac > 0){
                         String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(nbac-1));
                         output += String.format("%-"+string_length+"s", geno_val);

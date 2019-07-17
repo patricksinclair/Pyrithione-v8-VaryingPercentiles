@@ -376,20 +376,23 @@ class BioSystem {
         ArrayList<ArrayList<ArrayList<Double>>> mh_pops_over_time = new ArrayList<>(nMeasurements+1);
         ArrayList<Double> times = new ArrayList<>(nMeasurements+1);
 
+        //initial measurements
+        times.add(bs.getTimeElapsed());
+        mh_pops_over_time.add(bs.getMicrohabPopulations());
+
 
         while(bs.time_elapsed <= duration+0.02*interval){
 
             if((bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
 
                 int max_poss_pop = bs.getSystemSize()*K;
-                System.out.println("rep : "+runID+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
+                System.out.println("runID: "+runID+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
                 alreadyRecorded = true;
 
                 times.add(bs.getTimeElapsed());
                 mh_pops_over_time.add(bs.getMicrohabPopulations());
             }
             if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
-
 
             bs.performAction();
         }
