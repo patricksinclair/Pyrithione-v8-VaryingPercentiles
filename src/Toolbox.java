@@ -235,7 +235,7 @@ public class Toolbox {
             int string_length = 12;
 
             for(int t = 0; t < times.size(); t++){
-                bw.write("#t = "+String.format("%.3E", String.valueOf(times.get(t))));
+                bw.write("#t = "+String.format("%.3E", times.get(t)));
                 bw.newLine();
 
                 for(int mh = 0; mh < mh_pops_over_time.get(t).size(); mh++){

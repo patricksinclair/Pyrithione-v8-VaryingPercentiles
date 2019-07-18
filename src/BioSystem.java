@@ -376,9 +376,9 @@ class BioSystem {
         ArrayList<ArrayList<ArrayList<Double>>> mh_pops_over_time = new ArrayList<>(nMeasurements+1);
         ArrayList<Double> times = new ArrayList<>(nMeasurements+1);
 
-        //initial measurements
-        times.add(bs.getTimeElapsed());
-        mh_pops_over_time.add(bs.getMicrohabPopulations());
+        //initial measurements - are actually already included in the stuff below
+        //times.add(bs.getTimeElapsed());
+        //mh_pops_over_time.add(bs.getMicrohabPopulations());
 
 
         while(bs.time_elapsed <= duration+0.02*interval){
