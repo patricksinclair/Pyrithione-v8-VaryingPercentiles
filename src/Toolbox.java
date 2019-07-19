@@ -256,6 +256,11 @@ public class Toolbox {
                         output += String.format("%-"+string_length+"s", geno_val);
                     }
 
+                    if(nbac==0){
+                        //adds a negative value to avoid empty strings
+                        output += String.format("%-"+string_length+"s", -9999);
+                    }
+
                     bw.write(output);
                     bw.newLine();
                 }
