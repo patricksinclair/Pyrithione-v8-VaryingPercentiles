@@ -74,10 +74,12 @@ class BioSystem {
     }
 
     private ArrayList<ArrayList<Double>> getMicrohabPopulations(){
-        ArrayList<ArrayList<Double>> mh_pops = new ArrayList<>(getSystemSize());
+        ArrayList<ArrayList<Double>> mh_pops = new ArrayList<>();
+
         for(Microhabitat m : microhabitats){
             mh_pops.add(m.getPopulation());
         }
+
         return mh_pops;
     }
 
@@ -332,6 +334,7 @@ class BioSystem {
         int nMeasurements = 100; //no. of measurements
 
         double duration = 25.*7.*24.; //25 week duration
+        //double duration = 100.;
 
         String results_directory = "all_run_populations/";
         String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
@@ -373,13 +376,8 @@ class BioSystem {
         boolean alreadyRecorded = false;
 
         BioSystem bs = new BioSystem(alpha, c_max, scale, sigma);
-        ArrayList<ArrayList<ArrayList<Double>>> mh_pops_over_time = new ArrayList<>(nMeasurements+1);
-        ArrayList<Double> times = new ArrayList<>(nMeasurements+1);
-
-        //initial measurements - are actually already included in the stuff below
-        //times.add(bs.getTimeElapsed());
-        //mh_pops_over_time.add(bs.getMicrohabPopulations());
-
+        ArrayList<ArrayList<ArrayList<Double>>> mh_pops_over_time = new ArrayList<>();
+        ArrayList<Double> times = new ArrayList<>();
 
         while(bs.time_elapsed <= duration+0.02*interval){
 
@@ -390,7 +388,14 @@ class BioSystem {
                 alreadyRecorded = true;
 
                 times.add(bs.getTimeElapsed());
-                mh_pops_over_time.add(bs.getMicrohabPopulations());
+
+                ArrayList<ArrayList<Double>> mh_pops = bs.getMicrohabPopulations();
+                ArrayList<ArrayList<Double>> measured_mh_pops = new ArrayList<>();
+                for(ArrayList<Double> mhp : mh_pops){
+                    measured_mh_pops.add(new ArrayList<>(mhp));
+                }
+                mh_pops_over_time.add(measured_mh_pops);
+
             }
             if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
 

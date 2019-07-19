@@ -232,9 +232,11 @@ public class Toolbox {
             ArrayList<Double> times = dataBox.getTimes();
             ArrayList<ArrayList<ArrayList<Double>>> mh_pops_over_time = dataBox.getAll_microhab_pops();
 
+
             int string_length = 12;
 
-            for(int t = 0; t < times.size(); t++){
+            for(int t = 0; t < mh_pops_over_time.size(); t++){
+
                 bw.write("#t = "+String.format("%.3E", times.get(t)));
                 bw.newLine();
 
@@ -242,6 +244,7 @@ public class Toolbox {
 
                     String output = "";
                     int nbac = mh_pops_over_time.get(t).get(mh).size();
+
                     for(int b = 0; b < nbac-1; b++){
 
                         String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(b))+",";
@@ -252,7 +255,6 @@ public class Toolbox {
                         String geno_val = String.format("%.5E", mh_pops_over_time.get(t).get(mh).get(nbac-1));
                         output += String.format("%-"+string_length+"s", geno_val);
                     }
-
 
                     bw.write(output);
                     bw.newLine();
