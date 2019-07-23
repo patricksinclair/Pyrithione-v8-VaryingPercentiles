@@ -258,7 +258,8 @@ public class Toolbox {
 
                     if(nbac==0){
                         //adds a negative value to avoid empty strings
-                        output += String.format("%-"+string_length+"s", -9999);
+                        String empty_val = String.format("%.5E", -9999);
+                        output += String.format("%-"+string_length+"s", empty_val);
                     }
 
                     bw.write(output);

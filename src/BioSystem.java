@@ -326,17 +326,17 @@ class BioSystem {
 
 
 
-    static void getEventCountersAndRunPopulations(int nReps, double scale, double sigma){
+    static void getEventCountersAndRunPopulations(int nReps, double scale, double sigma, String folderID){
         long startTime = System.currentTimeMillis();
 
         int nSections = 9; //number of sections the reps will be divided into, to avoid using loadsa resources
         int nRuns = nReps/nSections; //number of runs in each section
-        int nMeasurements = 100; //no. of measurements
+        int nMeasurements = 100; //no. of measurements - todo change stuff back for big runs
 
         double duration = 25.*7.*24.; //25 week duration
         //double duration = 100.;
 
-        String results_directory = "all_run_populations/";
+        String results_directory = "all_run_populations"+folderID+"/";
         String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
         String event_counters_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
         String mh_pops_over_time_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-sigma="+String.format("%.5f", sigma)+"-mh_pops-runID=";
