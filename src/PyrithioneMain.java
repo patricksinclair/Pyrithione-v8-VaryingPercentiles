@@ -9,7 +9,7 @@ public class PyrithioneMain {
         String folderID95 = "-95_suscep"+date;
         String folderID90 = "-90_suscep"+date;
 
-        int nReps = 9;
+        int nReps = 180;
         System.out.println("geno distbs now with thickness limit and file handling including empty lines");
 
         BioSystem.getEventCountersAndRunPopulations(nReps, scale_99, sigma_99, folderID99);
