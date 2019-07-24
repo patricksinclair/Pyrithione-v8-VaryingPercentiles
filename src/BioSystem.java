@@ -333,8 +333,8 @@ class BioSystem {
         int nRuns = nReps/nSections; //number of runs in each section
         int nMeasurements = 100; //no. of measurements - todo change stuff back for big runs
 
-        //double duration = 25.*7.*24.; //25 week duration
-        double duration = 10.;
+        double duration = 25.*7.*24.; //25 week duration
+        //double duration = 10.;
 
         /*String results_directory = "all_run_populations"+folderID+"/";
         String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
