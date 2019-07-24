@@ -333,15 +333,19 @@ class BioSystem {
         int nRuns = nReps/nSections; //number of runs in each section
         int nMeasurements = 100; //no. of measurements - todo change stuff back for big runs
 
-        double duration = 25.*7.*24.; //25 week duration
-        //double duration = 100.;
+        //double duration = 25.*7.*24.; //25 week duration
+        double duration = 10.;
 
-        String results_directory = "all_run_populations"+folderID+"/";
+        /*String results_directory = "all_run_populations"+folderID+"/";
         String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
         String event_counters_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
         String mh_pops_over_time_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-sigma="+String.format("%.5f", sigma)+"-mh_pops-runID=";
-
+        */
+        String results_directory_name = "all_run_populations"+folderID;
+        String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
         DataBox[] dataBoxes = new DataBox[nReps];
+        String event_counters_filename = "pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
+        String mh_pops_over_time_filename = "pyrithione-t="+String.valueOf(duration)+"-sigma="+String.format("%.5f", sigma)+"-mh_pops-runID=";
 
         for(int j = 0; j < nSections; j++){
             System.out.println("section: "+j);
@@ -351,11 +355,11 @@ class BioSystem {
         }
 
 
-        Toolbox.writeDataboxEventCountersToFile(event_counters_filename, headers, dataBoxes);
+        Toolbox.writeDataboxEventCountersToFile(results_directory_name, event_counters_filename, headers, dataBoxes);
 
         for(int i = 0; i < dataBoxes.length; i++){
             String run_filename = mh_pops_over_time_filename+String.valueOf(dataBoxes[i].getRunID());
-            Toolbox.writeDataboxMicrohabPopsToFile(run_filename, dataBoxes[i]);
+            Toolbox.writeDataboxMicrohabPopsToFile(results_directory_name, run_filename, dataBoxes[i]);
         }
 
 

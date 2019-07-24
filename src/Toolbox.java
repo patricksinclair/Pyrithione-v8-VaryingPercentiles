@@ -174,11 +174,18 @@ public class Toolbox {
     }
 
 
-    static void writeDataboxEventCountersToFile(String filename, String[] headers, DataBox[] dataBoxes){
+    static void writeDataboxEventCountersToFile(String directoryName, String filename, String[] headers, DataBox[] dataBoxes){
+
+
+
+        File directory = new File(directoryName);
+        if(!directory.exists()) directory.mkdirs();
+
+        File file = new File(directoryName+"/"+filename+".txt");
+        //if(!file.exists()) file.createNewFile();
+
 
         try{
-            File file = new File(filename+".txt");
-            if(!file.exists()) file.createNewFile();
 
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
@@ -220,11 +227,21 @@ public class Toolbox {
     }
 
 
-    static void writeDataboxMicrohabPopsToFile(String filename, DataBox dataBox){
+    static void writeDataboxMicrohabPopsToFile(String directoryName, String filename, DataBox dataBox){
+
+        File directory = new File(directoryName);
+        if(!directory.exists()) directory.mkdirs();
+
+        File file = new File(directoryName+"/"+filename+".txt");
 
         try{
-            File file = new File(filename+".txt");
-            if(!file.exists()) file.createNewFile();
+
+
+            /*File file = new File(filename+".txt");
+            if(!file.exists()){
+                //file.createNewFile();
+                new File(filename).mkdirs();
+            }*/
 
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
