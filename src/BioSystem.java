@@ -76,8 +76,16 @@ class BioSystem {
     private ArrayList<ArrayList<Double>> getMicrohabPopulations(){
         ArrayList<ArrayList<Double>> mh_pops = new ArrayList<>();
 
-        for(Microhabitat m : microhabitats){
+        /*for(Microhabitat m : microhabitats){
             mh_pops.add(m.getPopulation());
+        }*/
+
+        for(Microhabitat m : microhabitats){
+            ArrayList<Double> mh_pop = new ArrayList<>();
+            for(Double geno : m.getPopulation()){
+                mh_pop.add(geno);
+            }
+            mh_pops.add(mh_pop);
         }
 
         return mh_pops;
@@ -271,12 +279,16 @@ class BioSystem {
     static void getEventCountersAndRunPopulations(int nReps, double scale, double sigma, String folderID){
         long startTime = System.currentTimeMillis();
 
-        int nSections = 9; //number of sections the reps will be divided into, to avoid using loadsa resources
+        /*int nSections = 9; //number of sections the reps will be divided into, to avoid using loadsa resources
         int nRuns = nReps/nSections; //number of runs in each section
-        int nMeasurements = 100; //no. of measurements - todo change stuff back for big runs
+        int nMeasurements = 100; //no. of measurements - todo change stuff back for big runs*/
+
+        int n_runs_per_section = 20;
+        int n_sections = nReps/n_runs_per_section;
+        int nMeasurements = 100;
 
         double duration = 25.*7.*24.; //25 week duration
-        //double duration = 10.;
+        //double duration = 8.;
 
         String results_directory_name = "all_run_populations"+folderID;
         String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
@@ -284,10 +296,10 @@ class BioSystem {
         String event_counters_filename = "pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
         String mh_pops_over_time_filename = "pyrithione-t="+String.valueOf(duration)+"-sigma="+String.format("%.5f", sigma)+"-mh_pops-runID=";
 
-        for(int j = 0; j < nSections; j++){
+        for(int j = 0; j < n_sections; j++){
             System.out.println("section: "+j);
 
-            IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i ->
+            IntStream.range(j*n_runs_per_section, (j+1)*n_runs_per_section).parallel().forEach(i ->
                     dataBoxes[i] = getEventCountersAndRunPops_Subroutine(duration, nMeasurements, i, scale, sigma));
         }
 
@@ -329,13 +341,14 @@ class BioSystem {
                 alreadyRecorded = true;
 
                 times.add(bs.getTimeElapsed());
+                mh_pops_over_time.add(bs.getMicrohabPopulations()); //added in now
 
-                ArrayList<ArrayList<Double>> mh_pops = bs.getMicrohabPopulations();
+                /*ArrayList<ArrayList<Double>> mh_pops = bs.getMicrohabPopulations();
                 ArrayList<ArrayList<Double>> measured_mh_pops = new ArrayList<>();
                 for(ArrayList<Double> mhp : mh_pops){
                     measured_mh_pops.add(new ArrayList<>(mhp));
                 }
-                mh_pops_over_time.add(measured_mh_pops);
+                mh_pops_over_time.add(measured_mh_pops);*/
 
             }
             if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
