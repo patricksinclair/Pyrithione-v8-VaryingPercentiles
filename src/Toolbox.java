@@ -236,13 +236,6 @@ public class Toolbox {
 
         try{
 
-
-            /*File file = new File(filename+".txt");
-            if(!file.exists()){
-                //file.createNewFile();
-                new File(filename).mkdirs();
-            }*/
-
             FileWriter fw = new FileWriter(file.getAbsoluteFile());
             BufferedWriter bw = new BufferedWriter(fw);
 

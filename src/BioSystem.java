@@ -266,64 +266,6 @@ class BioSystem {
 
 
 
-    private static int[] getThicknessAndEventCountersReachedAfterATime(double duration, int i, double scale, double sigma){
-        int K = 120;
-        double c_max = 10., alpha = 0.01;
-
-        BioSystem bs = new BioSystem(alpha, c_max, scale, sigma);
-        System.out.println("detach_rate: "+bs.deterioration_rate);
-        int nUpdates = 20;
-        double interval = duration/nUpdates;
-        boolean alreadyRecorded = false;
-
-
-        while(bs.time_elapsed <= duration){
-
-            if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
-
-                int max_poss_pop = bs.getSystemSize()*K;
-                System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
-                alreadyRecorded = true;
-            }
-            if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
-
-
-            bs.performAction();
-        }
-        if((int)bs.exit_time == 0) bs.exit_time = duration;
-
-        return new int[]{bs.getBiofilmThickness(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_immigrations(), bs.getN_replications(), (int)bs.getExit_time()};
-    }
-
-
-    static void getBiofilmThicknessHistoInParallel(int nReps, double scale, double sigma){
-        long startTime = System.currentTimeMillis();
-
-        int nSections = 9; //number of sections the reps will be divided into, to avoid using loadsa resources
-        int nRuns = nReps/nSections; //number of runs in each section
-
-        double duration = 25.*7.*24.; //25 week duration
-
-        int[][] index_and_counters_reached = new int[nReps][];
-
-        String index_reached_filename = "pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
-        String[] headers = new String[]{"bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
-
-        for(int j = 0; j < nSections; j++){
-            System.out.println("section: "+j);
-
-            IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i ->
-                    index_and_counters_reached[i] = BioSystem.getThicknessAndEventCountersReachedAfterATime(duration, i, scale, sigma));
-        }
-
-        Toolbox.writeCountersToFile(index_reached_filename, headers, index_and_counters_reached);
-
-        long finishTime = System.currentTimeMillis();
-        String diff = Toolbox.millisToShortDHMS(finishTime - startTime);
-        System.out.println("results written to file");
-        System.out.println("Time taken: "+diff);
-    }
-
 
 
     static void getEventCountersAndRunPopulations(int nReps, double scale, double sigma, String folderID){
@@ -336,11 +278,6 @@ class BioSystem {
         double duration = 25.*7.*24.; //25 week duration
         //double duration = 10.;
 
-        /*String results_directory = "all_run_populations"+folderID+"/";
-        String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
-        String event_counters_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
-        String mh_pops_over_time_filename = results_directory+"pyrithione-t="+String.valueOf(duration)+"-sigma="+String.format("%.5f", sigma)+"-mh_pops-runID=";
-        */
         String results_directory_name = "all_run_populations"+folderID;
         String[] headers = new String[]{"run_ID", "bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
         DataBox[] dataBoxes = new DataBox[nReps];
@@ -411,6 +348,69 @@ class BioSystem {
 
         return new DataBox(runID, event_counters, times, mh_pops_over_time);
     }
+
+
+
+
+
+    private static int[] getThicknessAndEventCountersReachedAfterATime(double duration, int i, double scale, double sigma){
+        int K = 120;
+        double c_max = 10., alpha = 0.01;
+
+        BioSystem bs = new BioSystem(alpha, c_max, scale, sigma);
+        System.out.println("detach_rate: "+bs.deterioration_rate);
+        int nUpdates = 20;
+        double interval = duration/nUpdates;
+        boolean alreadyRecorded = false;
+
+
+        while(bs.time_elapsed <= duration){
+
+            if((bs.getTimeElapsed()%interval >= 0. && bs.getTimeElapsed()%interval <= 0.02*interval) && !alreadyRecorded){
+
+                int max_poss_pop = bs.getSystemSize()*K;
+                System.out.println("rep : "+i+"\tt: "+bs.getTimeElapsed()+"\tpop size: "+bs.getTotalN()+"/"+max_poss_pop+"\tbf_edge: "+bs.getBiofilmEdge());
+                alreadyRecorded = true;
+            }
+            if(bs.getTimeElapsed()%interval >= 0.1*interval) alreadyRecorded = false;
+
+
+            bs.performAction();
+        }
+        if((int)bs.exit_time == 0) bs.exit_time = duration;
+
+        return new int[]{bs.getBiofilmThickness(), bs.getN_deaths(), bs.getN_detachments(), bs.getN_immigrations(), bs.getN_replications(), (int)bs.getExit_time()};
+    }
+
+
+    static void getBiofilmThicknessHistoInParallel(int nReps, double scale, double sigma){
+        long startTime = System.currentTimeMillis();
+
+        int nSections = 9; //number of sections the reps will be divided into, to avoid using loadsa resources
+        int nRuns = nReps/nSections; //number of runs in each section
+
+        double duration = 25.*7.*24.; //25 week duration
+
+        int[][] index_and_counters_reached = new int[nReps][];
+
+        String index_reached_filename = "pyrithione-t="+String.valueOf(duration)+"-parallel-event_counters_sigma="+String.format("%.5f", sigma);
+        String[] headers = new String[]{"bf thickness", "n_deaths", "n_detachments", "n_immigrations", "n_replications", "exit time"};
+
+        for(int j = 0; j < nSections; j++){
+            System.out.println("section: "+j);
+
+            IntStream.range(j*nRuns, (j+1)*nRuns).parallel().forEach(i ->
+                    index_and_counters_reached[i] = BioSystem.getThicknessAndEventCountersReachedAfterATime(duration, i, scale, sigma));
+        }
+
+        Toolbox.writeCountersToFile(index_reached_filename, headers, index_and_counters_reached);
+
+        long finishTime = System.currentTimeMillis();
+        String diff = Toolbox.millisToShortDHMS(finishTime - startTime);
+        System.out.println("results written to file");
+        System.out.println("Time taken: "+diff);
+    }
+
 
 
 
