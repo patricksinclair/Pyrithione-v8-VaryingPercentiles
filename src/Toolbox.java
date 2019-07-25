@@ -275,7 +275,7 @@ public class Toolbox {
 
                     if(nbac==0){
                         //adds a negative value to avoid empty strings
-                        String empty_val = String.format("%.5E", -9999);
+                        String empty_val = String.format("%.5E", -9999.0);
                         output += String.format("%-"+string_length+"s", empty_val);
                     }
 
